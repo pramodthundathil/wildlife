@@ -71,7 +71,7 @@
 			                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-menu">
 			                    <i class="fa fa-bars"></i>
 			                </button>
-			                <a class="navbar-brand" href="index.html">Wild Life Tracker</a>
+			                <a class="navbar-brand" href="{%url 'Index'%}">Wild Life Tracker</a>
 			            </div><!--/.navbar-header-->
 			            <!-- End Header Navigation -->
 
@@ -95,7 +95,7 @@
 
 		</header><!-- /.top-area-->
 		<!-- top-area End -->
-	
+	{% block content %}
 		<!--welcome-hero start -->
 		<section  class="welcome-hero">
 			<div class="container">
@@ -103,7 +103,7 @@
 					<div class="col-md-12 text-center">
 						<div class="header-text">
 							<h2> <span>Protect</span> From<br>Animals<br>  <span>.</span>   </h2>
-							<a href="{%url 'CallCam' %}" >Start Camera</a>
+							<a href="{%url 'VideoMin' %}" >Start Camera</a>
 						</div><!--/.header-text-->
 					</div><!--/.col-->
 				</div><!-- /.row-->
@@ -112,7 +112,7 @@
 		</section><!--/.welcome-hero-->
 		<!--welcome-hero end -->
 
-		
+		{% endblock %}
 
 
 

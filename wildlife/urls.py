@@ -22,6 +22,9 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path("",views.Index,name = "Index"),
     path("CallCam",views.CallCam,name = "CallCam"),
+    path("video_feed",views.video_feed,name = "video_feed"),
+    path("VideoMin",views.VideoMin,name = "VideoMin"),
 
+    
     
 ]

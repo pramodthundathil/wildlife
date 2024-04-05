@@ -49,8 +49,7 @@ def Analyse():
     labelsPath = "Home\yolo-coco\coco.names"
     LABELS = open(labelsPath).read().strip().split("\n")
     final_classes = ['bird', 'cat', 'dog', 'sheep', 'horse', 'cow', 'elephant', 'Tiger', 'bear', 'giraffe']
-    domestic_animals = ['bird', 'cat', 'dog', 'sheep', 'cow']
-    wild_animals = ['elephant', 'Tiger', 'bear', 'giraffe']
+
     np.random.seed(42)
     COLORS = np.random.randint(0, 255, size=(len(LABELS), 3),
         dtype="uint8")
@@ -139,23 +138,24 @@ def Analyse():
         # ensure at least one detection exists
         if len(idxs) > 0:
             # loop over the indexes we are keeping
-            # Modify the color selection based on whether the detected animal is domestic or wild
             for i in idxs.flatten():
                 # extract the bounding box coordinates
                 (x, y) = (boxes[i][0], boxes[i][1])
                 (w, h) = (boxes[i][2], boxes[i][3])
-
-                if LABELS[classIDs[i]] in domestic_animals:
-                    color = (0, 255, 0)  # Green color for domestic animals
-                elif LABELS[classIDs[i]] in wild_animals:
-                    color = (0, 0, 255)  # Red color for wild animals
-                else:
-                    color = (255, 0, 0)  # Default color (blue) for other animals
-
-                cv2.rectangle(frame, (x, y), (x + w, y + h), color, 2)
-                text = "{}".format(LABELS[classIDs[i]], confidences[i])
-                cv2.putText(frame, text, (x, y - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
-                    
+                
+                if(LABELS[classIDs[i]] in final_classes):
+                    # playsound('alarm.wav')
+                    if(flag):
+                        alert()
+                        flag=False
+                        async_email(LABELS[classIDs[i]])
+                    color = [int(c) for c in COLORS[classIDs[i]]]
+                    cv2.rectangle(frame, (x, y), (x + w, y + h), color, 2)
+                    text = "{}: ".format(LABELS[classIDs[i]],
+                        confidences[i])
+                    cv2.putText(frame, text, (x, y - 5),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
+        
         else:
             flag=True
 

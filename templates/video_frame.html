@@ -1,0 +1,14 @@
+{% extends 'index.html' %}
+{% block content %}
+<style>
+    .content{
+        width: 800px;
+        margin: auto;
+        margin-top: 100px;
+    }
+</style>
+<div class="content mb-5">
+<img id="video-feed" src="{% url 'video_feed' %}" width="800" height="680">
+</div>
+
+{% endblock %}

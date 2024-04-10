@@ -24,6 +24,7 @@ urlpatterns = [
     path("CallCam",views.CallCam,name = "CallCam"),
     path("video_feed",views.video_feed,name = "video_feed"),
     path("VideoMin",views.VideoMin,name = "VideoMin"),
+    path('get-animal-data/', views.get_animal_data, name='get_animal_data'),
 
     
     

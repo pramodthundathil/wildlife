@@ -11,6 +11,10 @@ import imghdr
 from email.message import EmailMessage
 from playsound import playsound
 from django.views.decorators import gzip
+from .models import Animal
+
+from django.core.mail import EmailMessage
+from django.template.loader import render_to_string
 
 
 
@@ -19,30 +23,35 @@ stop_video_feed = False
 
 # Function to alert
 def alert():
-    threading.Thread(target=playsound, args=('alarm.wav',), daemon=True).start()
+    threading.Thread(target=playsound, args=('Home/alarm.wav',), daemon=True).start()
 
 # Function to send email
-def send_email(label):
-    Sender_Email = "@gmail.com"
-    Reciever_Email = "@gmail.com"
-    Password = ''   #ENTER GOOGLE APP PASSWORD HERE
+def send_email():
+    # Sender_Email = "cepcentre007@gmail.com"
+    # Reciever_Email = "alvinjoseph2022@gmail.com"
+    # Password = 'sjcapvmtthbkdhuh'   #ENTER GOOGLE APP PASSWORD HERE
 
-    newMessage = EmailMessage()   
-    newMessage['Subject'] = "Animal Detected" 
-    newMessage['From'] = Sender_Email  
-    newMessage['To'] = Reciever_Email  
-    newMessage.set_content('An animal has been detected') 
+    # newMessage = EmailMessage()   
+    # newMessage['Subject'] = "Animal Detected" 
+    # newMessage['From'] = Sender_Email  
+    # newMessage['To'] = Reciever_Email  
+    # newMessage.set_content('An animal has been detected') 
 
-    with open('images/' + label + '.png', 'rb') as f:
-        image_data = f.read()
-        image_type = imghdr.what(f.name)
-        image_name = f.name[7:]
+    # with open('images/' + label + '.png', 'rb') as f:
+    #     image_data = f.read()
+    #     image_type = imghdr.what(f.name)
+    #     image_name = f.name[7:]
 
-    newMessage.add_attachment(image_data, maintype='image', subtype=image_type, filename=image_name)
+    # newMessage.add_attachment(image_data, maintype='image', subtype=image_type, filename=image_name)
 
-    with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp:
-        smtp.login(Sender_Email, Password) 
-        smtp.send_message(newMessage)
+    # with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp:
+    #     smtp.login(Sender_Email, Password) 
+    #     smtp.send_message(newMessage)
+    mail_subject = 'animal detected'
+    message = render_to_string('emailbody.html', {'name': "Animal Detacted",})
+
+    email = EmailMessage(mail_subject, message, to=["alvinjoseph2022@gmail.com","gopinath.pramod@gmail.com"])
+    email.send(fail_silently=True)
 
 # Function to asynchronously send email
 def async_email(label):
@@ -105,12 +114,36 @@ def process_frame():
                 elif LABELS[classIDs[i]] in wild_animals:
                     color = (0, 0, 255)  
                 else:
+                    try:
+                        val = Animal.objects.get(id = 1)
+                        val.animal = LABELS[classIDs[i]]
+                        val.save()
+                    except:
+                        Animal.objects.create(animal = LABELS[classIDs[i]]).save()
                     color = (255, 0, 0)  
                 cv2.rectangle(frame, (x, y), (x + w, y + h), color, 2)
                 text = "{}".format(LABELS[classIDs[i]], confidences[i])
                 cv2.putText(frame, text, (x, y - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
-                alert()  # Alert if any animal detected
-                async_email(LABELS[classIDs[i]])  # Send email
+                try:
+                    val = Animal.objects.get(id = 1)
+                    val.animal = LABELS[classIDs[i]]
+                    val.save()
+                except:
+                    Animal.objects.create(animal = LABELS[classIDs[i]]).save()
+
+                if LABELS[classIDs[i]] in domestic_animals:
+                    color = (0, 255, 0)  
+                elif LABELS[classIDs[i]] in wild_animals:
+                    mail_subject = 'animal detected'
+                    message = render_to_string('emailbody.html', {'name': "Animal Detacted",})
+
+                    email = EmailMessage(mail_subject, message, to=["alvinjoseph2022@gmail.com","gopinath.pramod@gmail.com"])
+                    email.send(fail_silently=True)
+                    print("---------------------------------------------------")
+                    alert() 
+
+                            # Alert if any animal detected
+                    # async_email(LABELS[classIDs[i]])  # Send email
         else:
             flag=True  # This line seems unnecessary
 
@@ -128,7 +161,16 @@ def generate_frames():
             yield frame
 
 def Index(request):
-    return render(request, "index.html")
+    try:
+        animal = Animal.objects.all()[0].animal
+    except:
+        animal = "No Animal"
+
+    context = {
+        "animal":animal
+    }
+
+    return render(request, "index.html",context)
 
 def CallCam(request):
     global stop_video_feed
@@ -136,8 +178,31 @@ def CallCam(request):
     threading.Thread(target=generate_frames).start()
     return redirect('VideoMin')
 
+
+# views.py
+
+from django.http import JsonResponse
+ 
+
+def get_animal_data(request):
+    # Assuming you have a model named Animal with a field called 'name'
+    # You can modify this query based on your actual model structure
+    latest_animal = Animal.objects.latest('id')
+    animal_name = latest_animal.animal
+    return JsonResponse({'animal': animal_name})
+
+
 def VideoMin(request):
-    return render(request, "video_frame.html")
+    try:
+        animal = Animal.objects.all()[0].animal
+    except:
+        animal = "No Animal"
+
+    context = {
+        "animal":animal
+    }
+
+    return render(request, "video_frame.html",context)
 
 @gzip.gzip_page
 def video_feed(request):

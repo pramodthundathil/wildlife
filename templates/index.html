@@ -129,12 +129,12 @@
 								<div class="single-profile">
 									<div class="profile-txt">
 										<a href=""></a>
-										<div class="profile-icon-name">ELEPHANT</div>
+										<div class="profile-icon-name">{{animal}}</div>
 									</div>
 									<div class="single-profile-overlay">
 										<div class="profile-txt">
 											<a href=""></a>
-											<div class="profile-icon-name">Predicted animal</div>
+											<div id="animal" class="profile-icon-name">{{animal}}</div>
 										</div>
 									</div>
 								</div>
@@ -144,12 +144,12 @@
 								<div class="single-profile profile-no-border">
 									<div class="profile-txt">
 										<a href=""></a>
-										<div class="profile-icon-name">120 MTRS</div>
+										<div id="demo" class="profile-icon-name"> </div>
 									</div>
 									<div class="single-profile-overlay">
 										<div class="profile-txt">
 											<a href=""></a>
-											<div class="profile-icon-name">Distance</div>
+											<div id="demo1" class="profile-icon-name">Distance</div>
 										</div>
 									</div>
 								</div>
@@ -259,6 +259,50 @@
 			
         </footer><!--/.footer-copyright-->
 		<!--footer-copyright end-->
+
+		<script src="https://www.gstatic.com/firebasejs/7.14.6/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/7.14.6/firebase-database.js"></script>
+<script>
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCRbedhstRNeLzT3eZjk_vJJtt-2yl5XRY",
+  authDomain: "animaldetection-447fd.firebaseapp.com",
+  databaseURL: "https://animaldetection-447fd-default-rtdb.firebaseio.com",
+  projectId: "animaldetection-447fd",
+  storageBucket: "animaldetection-447fd.appspot.com",
+  messagingSenderId: "240582211167",
+  appId: "1:240582211167:web:a87614e11d0d7fd0d00dea",
+  measurementId: "G-BX2TXVCVCP"
+};
+
+  firebase.initializeApp(firebaseConfig);
+
+  var database = firebase.database();
+
+// Reference to the 'test' path
+// var testRef = database.ref('test');
+
+// Function to fetch and update data
+function fetchData() {
+  var testRef = database.ref('test');
+
+  testRef.once('value').then(function(snapshot) {
+    var testData = snapshot.val();
+    console.log(testData['distance']);
+  
+    document.getElementById("demo").innerHTML = "distance " + testData['distance'] + " MTRS";
+    document.getElementById("demo1").innerHTML = "distance " + testData['distance'] + " MTRS";
+    // Do something with the distance data here
+  }).catch(function(error) {
+    console.error("Error retrieving data: ", error);
+  });
+}
+
+fetchData();
+
+// Periodically fetch data every 5 seconds (adjust as needed)
+setInterval(fetchData, 5000);
+</script>
 		
 		<!-- Include all js compiled plugins (below), or include individual files as needed -->
 
@@ -295,6 +339,29 @@
         
         <!--Custom JS-->
         <script src="{%static 'assets/js/custom.js' %}"></script>
+		<script>
+			// Update the value of the element with id "animal" using AJAX
+function updateAnimal() {
+    $.ajax({
+        url: '/get-animal-data/',
+        type: 'GET',
+        dataType: 'json',
+        success: function(response) {
+            $('#animal').text(response.animal);
+        },
+        error: function(error) {
+            console.error('Error fetching animal data:', error);
+        }
+    });
+}
+
+// Update the animal data initially
+updateAnimal();
+
+// Periodically fetch updated data (every 5 seconds)
+setInterval(updateAnimal, 5000);
+
+		</script>
         
     </body>
 	
